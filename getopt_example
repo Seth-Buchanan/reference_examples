@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    >&2 cat << EOF
+Usage: ${0##*/} [Options] [Files]
+   -e --enable             Enable the thing
+   -d --disable            Disable the thing
+   -t --text_field input   Flag with specific option
+EOF
+    exit 1
+}
+
+# ===== Default Settings =====
+text_field="default"
+enable=false
+disable=false
+
+args=$(getopt -a -o hedt: --long help,enable,disable,text_field: -- "$@")
+if [[ $? -gt 0 ]]; then
+    usage
+fi
+eval set -- ${args}
+while true; do
+    case $1 in
+	-e | --enable)     enable=true   ; shift   ;;
+	-d | --disable)    disable=true  ; shift   ;;
+	-h | --help)       usage         ; shift   ;;
+	-t | --text_field) text_field=$2 ; shift 2 ;;
+	--) shift; break ;;	# break when there are no arguments left
+	*)  echo Unsupported option 1>&2: $1
+	    usage ;;
+    esac
+done
+
+echo "remaining args: ${@}"
+echo "text = ${text_field}"
+echo "enable = ${enable}"
+echo "disable = ${disable}"
+
+if [ "${enable}" = "${disable}" ]; then
+    usage
+fi
